@@ -8,10 +8,10 @@ from supabase import create_client, Client
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-# ================== ÇÀÌÅÍÈÒÅ ÝÒÈ 3 ÇÍÀ×ÅÍÈß ==================
+# ================== ЗАМЕНИТЕ ЭТИ 3 ЗНАЧЕНИЯ ==================
 BOT_TOKEN = "8818244911:AAEYe7-3fcOyHUOvvN8dN64P68hUeM6mVkc"
 SUPABASE_URL = "https://ytnvmyivcrbeorfwreoy.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0bnZteWl2Y3JiZW9yZndyZW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MzA3MTksImV4cCI6MjA5NDUwNjcxOX0.JlE8z_VrAiFdg_vVPi8EujXMUG1QuX9HxVcWa0DzM54"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0bnZteWl2Y3JiZW9yZndyZW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MzA3MTksImV4cCI6MjA5NDUwNjcxOX0.JlE8z_VrAiFdg_vVPi8EujXMUG1QuX9HxVcWa0DzM54"  # <-- legacy anon key (не sb_publishable!)
 # ============================================================
 
 bot = Bot(token=BOT_TOKEN)
@@ -20,9 +20,9 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 main_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="?? Ìîè ïîäïèñêè")],
-        [KeyboardButton(text="? Äîáàâèòü ïîäïèñêó")],
-        [KeyboardButton(text="?? Ïðîôèëü")]
+        [KeyboardButton(text="📋 Мои подписки")],
+        [KeyboardButton(text="➕ Добавить подписку")],
+        [KeyboardButton(text="⚙️ Профиль")]
     ],
     resize_keyboard=True
 )
@@ -40,26 +40,26 @@ async def cmd_start(message: types.Message):
                 "is_premium": False
             }).execute()
     except Exception as e:
-        print(f"Îøèáêà: {e}")
+        print(f"Ошибка: {e}")
     
     await message.answer(
-        "Ïðèâåò! ß ïîìîãó îòñëåæèâàòü ïîäïèñêè.\n\n"
-        "• Áåñïëàòíî: äî 3 ïîäïèñîê\n"
-        "• Íàïîìèíàþ çà 1 äåíü äî ñïèñàíèÿ\n\n"
-        "Íàæìèòå «Äîáàâèòü ïîäïèñêó» èëè íàïèøèòå:\n"
-        "«ßíäåêñ Ïëþñ 299 25 monthly»",
+        "Привет! Я помогу отслеживать подписки.\n\n"
+        "• Бесплатно: до 3 подписок\n"
+        "• Напоминаю за 1 день до списания\n\n"
+        "Нажмите «Добавить подписку» или напишите:\n"
+        "«Яндекс Плюс 299 25 monthly»",
         reply_markup=main_kb
     )
 
-@dp.message(F.text == "? Äîáàâèòü ïîäïèñêó")
+@dp.message(F.text == "➕ Добавить подписку")
 async def add_btn(message: types.Message):
     await message.answer(
-        "Íàïèøèòå â ôîðìàòå:\n<b>Íàçâàíèå Ñóììà Äåíü Ïåðèîä</b>\n\n"
-        "Ïðèìåð: ßíäåêñ Ïëþñ 299 15 monthly",
+        "Напишите в формате:\n<b>Название Сумма День Период</b>\n\n"
+        "Пример: Яндекс Плюс 299 15 monthly",
         parse_mode="HTML"
     )
 
-@dp.message(F.text.regexp(r"^[\w\s\-à-ÿÀ-ß¸¨\.]+ \d+ \d+ (monthly|yearly)$"))
+@dp.message(F.text.regexp(r"^[\w\s\-а-яА-ЯёЁ\.]+ \d+ \d+ (monthly|yearly)$"))
 async def parse_subscription(message: types.Message):
     user_id = message.from_user.id
     parts = message.text.rsplit(" ", 3)
@@ -71,7 +71,7 @@ async def parse_subscription(message: types.Message):
         is_premium = user.data[0]["is_premium"] if user.data else False
         
         if len(subs.data) >= 3 and not is_premium:
-            await message.answer("? Ëèìèò: 3 ïîäïèñêè. Ïðåìèóì 149 ?/ìåñ.")
+            await message.answer("❌ Лимит: 3 подписки. Премиум 149 ₽/мес.")
             return
         
         today = datetime.now()
@@ -85,44 +85,44 @@ async def parse_subscription(message: types.Message):
         
         supabase.table("subscriptions").insert({
             "user_id": user_id, "name": name, "amount": amount,
-            "next_date": next_date.strftime("%Y-%m-%d"), "frequency": freq, "category": "ïðî÷åå"
+            "next_date": next_date.strftime("%Y-%m-%d"), "frequency": freq, "category": "прочее"
         }).execute()
         
         await message.answer(
-            f"? <b>{name}</b>\nÑóììà: {amount} ?\nÑëåä. ñïèñàíèå: {next_date.strftime('%d.%m.%Y')}",
+            f"✅ <b>{name}</b>\nСумма: {amount} ₽\nСлед. списание: {next_date.strftime('%d.%m.%Y')}",
             parse_mode="HTML", reply_markup=main_kb
         )
     except Exception as e:
-        await message.answer(f"Îøèáêà: {e}")
+        await message.answer(f"Ошибка: {e}")
         print(e)
 
-@dp.message(F.text == "?? Ìîè ïîäïèñêè")
+@dp.message(F.text == "📋 Мои подписки")
 async def list_subs(message: types.Message):
     user_id = message.from_user.id
     try:
         subs = supabase.table("subscriptions").select("*").eq("user_id", user_id).eq("is_active", True).execute()
         if not subs.data:
-            await message.answer("Ïîäïèñîê ïîêà íåò.")
+            await message.answer("Подписок пока нет.")
             return
         
         total = sum(s["amount"] for s in subs.data)
-        text = f"<b>Ïîäïèñêè</b> ({len(subs.data)} øò.)\nÂñåãî: <b>{total} ?/ìåñ</b>\n\n"
+        text = f"<b>Подписки</b> ({len(subs.data)} шт.)\nВсего: <b>{total} ₽/мес</b>\n\n"
         for s in subs.data:
             days = (datetime.strptime(s["next_date"], "%Y-%m-%d") - datetime.now()).days
-            emoji = "??" if days <= 1 else "??" if days <= 3 else "??"
-            text += f"{emoji} <b>{s['name']}</b> — {s['amount']} ?\nÑïèñàíèå: {s['next_date']} ({days} äí.)\n\n"
+            emoji = "🔴" if days <= 1 else "🟡" if days <= 3 else "🟢"
+            text += f"{emoji} <b>{s['name']}</b> — {s['amount']} ₽\nСписание: {s['next_date']} ({days} дн.)\n\n"
         await message.answer(text, parse_mode="HTML", reply_markup=main_kb)
     except Exception as e:
         print(e)
 
-@dp.message(F.text == "?? Ïðîôèëü")
+@dp.message(F.text == "⚙️ Профиль")
 async def profile(message: types.Message):
     user_id = message.from_user.id
     try:
         user = supabase.table("users").select("*").eq("telegram_id", user_id).execute()
         subs = supabase.table("subscriptions").select("*").eq("user_id", user_id).eq("is_active", True).execute()
-        status = "?? Ïðåìèóì" if user.data and user.data[0]["is_premium"] else "?? Áåñïëàòíî (3 ïîäïèñêè)"
-        await message.answer(f"<b>Ïðîôèëü</b>\n\nÏîäïèñîê: {len(subs.data)}\nÑòàòóñ: {status}\n\nÏðåìèóì: 149 ?/ìåñ", parse_mode="HTML")
+        status = "💎 Премиум" if user.data and user.data[0]["is_premium"] else "🆓 Бесплатно (3 подписки)"
+        await message.answer(f"<b>Профиль</b>\n\nПодписок: {len(subs.data)}\nСтатус: {status}\n\nПремиум: 149 ₽/мес", parse_mode="HTML")
     except Exception as e:
         print(e)
 
@@ -132,14 +132,14 @@ async def check_reminders():
         subs = supabase.table("subscriptions").select("*, users!inner(telegram_id)").eq("next_date", tomorrow).eq("is_active", True).execute()
         for s in subs.data:
             uid = s["users"]["telegram_id"]
-            await bot.send_message(uid, f"? Çàâòðà ñïèñàíèå: <b>{s['name']}</b> — {s['amount']} ?", parse_mode="HTML")
+            await bot.send_message(uid, f"⏰ Завтра списание: <b>{s['name']}</b> — {s['amount']} ₽", parse_mode="HTML")
             old = datetime.strptime(s["next_date"], "%Y-%m-%d")
             new = old.replace(month=old.month+1) if old.month < 12 else old.replace(year=old.year+1, month=1)
             if s["frequency"] == "yearly":
                 new = old.replace(year=old.year+1)
             supabase.table("subscriptions").update({"next_date": new.strftime("%Y-%m-%d")}).eq("id", s["id"]).execute()
     except Exception as e:
-        print(f"Íàïîìèíàíèÿ: {e}")
+        print(f"Напоминания: {e}")
 
 async def main():
     scheduler = AsyncIOScheduler()
