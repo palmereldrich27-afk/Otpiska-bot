@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 # ================== ÇÀÌÅÍÈÒÅ ÝÒÈ 3 ÇÍÀ×ÅÍÈß ==================
 BOT_TOKEN = "8818244911:AAEYe7-3fcOyHUOvvN8dN64P68hUeM6mVkc"
 SUPABASE_URL = "https://ytnvmyivcrbeorfwreoy.supabase.co"
-SUPABASE_KEY = "sb_publishable_hfkPckvm66I8VBQQT9x4WQ_nY83JRZM"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0bnZteWl2Y3JiZW9yZndyZW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MzA3MTksImV4cCI6MjA5NDUwNjcxOX0.JlE8z_VrAiFdg_vVPi8EujXMUG1QuX9HxVcWa0DzM54"
 # ============================================================
 
 bot = Bot(token=BOT_TOKEN)
